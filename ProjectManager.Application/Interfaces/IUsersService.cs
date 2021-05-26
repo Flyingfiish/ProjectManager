@@ -14,12 +14,12 @@ namespace ProjectManager.Application.Interfaces
 {
     public interface IUsersService
     {
-        void Register(RegisterRequest registerDto, CancellationToken cancellationToken = default);
-        UserShortDto GetUser(Specification<User> spec);
-        UserBIODto GetUserBIO(Specification<User> spec);
-        IEnumerable<ProjectPreviewDto> GetUserProjects(Specification<User> spec);
-        IEnumerable<TaskPreviewDto> GetUserTasks(Specification<User> spec);
-        void UpdateUserBIO(UserBIODto userBIODto);
-        void UpdatePassword(Guid userId, string oldPassword, string newPassword, string newPasswordConfirmation);
+        System.Threading.Tasks.Task Register(RegisterRequest registerDto, CancellationToken cancellationToken = default);
+        Task<UserShortDto> GetUser(Specification<User> spec);
+        Task<UserBIODto> GetUserBIO(Specification<User> spec);
+        Task<IEnumerable<ProjectPreviewDto>> GetUserProjects(Specification<User> spec);
+        Task<IEnumerable<TaskPreviewDto>> GetUserTasks(Specification<User> spec);
+        System.Threading.Tasks.Task UpdateUserBIO(UserBIODto userBIODto);
+        System.Threading.Tasks.Task UpdatePassword(Guid userId, string oldPassword, string newPassword, string newPasswordConfirmation);
     }
 }

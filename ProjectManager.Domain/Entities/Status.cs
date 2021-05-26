@@ -13,6 +13,8 @@ namespace ProjectManager.Domain.Entities
         public string Name { get; set; }
         public List<Task> Tasks { get; set; } = new List<Task>();
 
+        public int Index { get; set; }
+
         public Guid ProjectId { get; set; }
         public Project Project { get; set; }
     }

@@ -27,16 +27,16 @@ namespace ProjectManager.API.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly IUsersService _usersService;
+        private readonly UsersService _usersService;
 
-        public UsersController(IUsersService usersService)
+        public UsersController(UsersService usersService)
         {
             _usersService = usersService;
         }
 
         [HttpPut]
         [Route("[action]")]
-        public IActionResult Register(string login, string password, string firstName, string lastName, string surName)
+        public async Task<IActionResult> Register(string login, string password, string firstName, string lastName, string surName)
         {
             RegisterRequest registerRequest = new RegisterRequest()
             {
@@ -49,7 +49,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _usersService.Register(registerRequest);
+                await _usersService.Register(registerRequest);
                 return Ok();
             }
             catch(Exception err)
@@ -60,13 +60,13 @@ namespace ProjectManager.API.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        public IActionResult Authenticate(string login, string password)
+        public async Task<IActionResult> Authenticate(string login, string password)
         {
             if(String.IsNullOrEmpty(login) || String.IsNullOrEmpty(password))
             {
                 return BadRequest();
             }
-            var identity = GetIdentity(login, password);
+            var identity = await GetIdentity(login, password);
             if (identity == null)
             {
                 return BadRequest(new { errorText = "Invalid username or password." });
@@ -80,48 +80,48 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpGet]
         [Route("[action]")]
-        public IActionResult GetCurrentUser()
+        public async Task<IActionResult> GetCurrentUser()
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
             {
                 return Unauthorized();
             }
-            var user = _usersService.GetUser(new GetUserByIdSpecification(new Guid(id)));
+            var user = await _usersService.GetUser(new GetUserByIdSpecification(new Guid(id)));
             return Ok(user);
         }
 
         [Authorize]
         [HttpGet]
         [Route("[action]")]
-        public IActionResult GetUserProjects()
+        public async Task<IActionResult> GetUserProjects()
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
             {
                 return Unauthorized();
             }
-            var result = _usersService.GetUserProjects(new GetUserByIdSpecification(new Guid(id)));
+            var result = await _usersService.GetUserProjects(new GetUserByIdSpecification(new Guid(id)));
             return Ok(result);
         }
 
         [Authorize]
         [HttpGet]
         [Route("[action]")]
-        public IActionResult GetUserTasks()
+        public async Task<IActionResult> GetUserTasks()
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
             {
                 return Unauthorized();
             }
-            var result = _usersService.GetUserTasks(new GetUserByIdSpecification(new Guid(id)));
+            var result = await _usersService.GetUserTasks(new GetUserByIdSpecification(new Guid(id)));
             return Ok(result);
         }
 
-        private ClaimsIdentity GetIdentity(string login, string password)
+        private async Task<ClaimsIdentity> GetIdentity(string login, string password)
         {
-            UserShortDto person = _usersService.GetUser(new GetUserByLoginPassSpecification(login, PasswordHasher.GetHash(password)));
+            UserShortDto person = await _usersService.GetUser(new GetUserByLoginPassSpecification(login, PasswordHasher.GetHash(password)));
             if (person != null)
             {
                 var claims = new List<Claim>

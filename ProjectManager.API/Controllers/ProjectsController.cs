@@ -27,7 +27,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpPut]
         [Route("[action]")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -38,19 +38,13 @@ namespace ProjectManager.API.Controllers
 
             using (var reader = new StreamReader(Request.Body))
             {
-                var body = reader.ReadToEnd();
+                var body = await reader.ReadToEndAsync();
 
                 try
                 {
                     ProjectForCreateDto projectForCreate = JsonSerializer.Deserialize<ProjectForCreateDto>(body);
-                    projectForCreate.Project.CreatedById = createdById;
-                    projectForCreate.Project.CreatedAt = DateTime.UtcNow;
-                    projectForCreate.Project.ManagerId = createdById;
-                    _projectsService.Create(projectForCreate.Project);
-                    foreach(var member in projectForCreate.Members)
-                    {
-                        _projectsService.AddMember(projectForCreate.Project.Id, member, ParticipationType.Executor, createdById);
-                    }
+                    
+                    await _projectsService.Create(projectForCreate, createdById);
 
                     return Ok();
                 }
@@ -64,7 +58,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpPost]
         [Route("[action]")]
-        public IActionResult AddMember(Guid projectId, Guid memberId, ParticipationType participationType)
+        public async Task<IActionResult> AddMember(Guid projectId, Guid memberId, ParticipationType participationType)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -75,10 +69,10 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _projectsService.AddMember(projectId, memberId, participationType, actorId);
+                await _projectsService.AddMember(projectId, memberId, participationType, actorId);
                 return Ok();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return BadRequest(e.Message);
             }
@@ -87,7 +81,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpDelete]
         [Route("[action]")]
-        public IActionResult DeleteMember(Guid projectId, Guid memberId, ParticipationType participationType)
+        public async Task<IActionResult> DeleteMember(Guid projectId, Guid memberId, ParticipationType participationType)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -98,7 +92,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _projectsService.DeleteMember(projectId, memberId, actorId);
+                await _projectsService.DeleteMember(projectId, memberId, actorId);
                 return Ok();
             }
             catch (Exception e)
@@ -110,7 +104,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpPost]
         [Route("[action]")]
-        public IActionResult CreateTask(Guid projectId)
+        public async Task<IActionResult> CreateTask(Guid projectId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -123,22 +117,22 @@ namespace ProjectManager.API.Controllers
             {
                 using (var reader = new StreamReader(Request.Body))
                 {
-                    var body = reader.ReadToEnd();
+                    var body = await reader.ReadToEndAsync();
                     Domain.Entities.Task task = JsonSerializer.Deserialize<Domain.Entities.Task>(body);
-                    _projectsService.CreateTask(projectId, task, actorId);
+                    await _projectsService.CreateTask(projectId, task, actorId);
                     return Ok();
                 }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
             }
         }
 
         [Authorize]
         [HttpDelete]
         [Route("[action]")]
-        public IActionResult DeleteTask(Guid projectId, Guid taskId)
+        public async Task<IActionResult> DeleteTask(Guid projectId, Guid taskId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -149,7 +143,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _projectsService.DeleteTask(projectId, taskId, actorId);
+                await _projectsService.DeleteTask(projectId, taskId, actorId);
                 return Ok();
             }
             catch (Exception e)
@@ -161,7 +155,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpPost]
         [Route("[action]")]
-        public IActionResult UpdateManager(Guid projectId, Guid managerId)
+        public async Task<IActionResult> UpdateManager(Guid projectId, Guid managerId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -172,7 +166,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _projectsService.UpdateManager(projectId, managerId, actorId);
+                await _projectsService.UpdateManager(projectId, managerId, actorId);
                 return Ok();
             }
             catch (Exception e)
@@ -184,7 +178,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpGet]
         [Route("[action]")]
-        public IActionResult GetProject(Guid projectId)
+        public async Task<IActionResult> GetProject(Guid projectId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -195,7 +189,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                var response = _projectsService.GetProject(projectId, actorId);
+                var response = await _projectsService.GetProject(projectId, actorId);
                 return Ok(response);
             }
             catch (Exception e)
@@ -207,7 +201,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpGet]
         [Route("[action]")]
-        public IActionResult GetProjectTasks(Guid projectId)
+        public async Task<IActionResult> GetProjectTasks(Guid projectId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -218,7 +212,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                var response = _projectsService.GetProjectTasks(projectId, actorId);
+                var response = await _projectsService.GetProjectTasks(projectId, actorId);
                 return Ok(response);
             }
             catch (Exception e)
@@ -230,7 +224,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpPost]
         [Route("[action]")]
-        public IActionResult AddTeam(Guid projectId, Guid teamId)
+        public async Task<IActionResult> AddTeam(Guid projectId, Guid teamId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -241,7 +235,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _projectsService.AddTeam(projectId, teamId, actorId);
+                await _projectsService.AddTeam(projectId, teamId, actorId);
                 return Ok();
             }
             catch (Exception e)
@@ -253,7 +247,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpDelete]
         [Route("[action]")]
-        public IActionResult DeleteTeam(Guid projectId, Guid teamId)
+        public async Task<IActionResult> DeleteTeam(Guid projectId, Guid teamId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -264,7 +258,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _projectsService.DeleteTeam(projectId, teamId, actorId);
+                await _projectsService.DeleteTeam(projectId, teamId, actorId);
                 return Ok();
             }
             catch (Exception e)
@@ -276,7 +270,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpDelete]
         [Route("[action]")]
-        public IActionResult Delete(Guid projectId)
+        public async Task<IActionResult> Delete(Guid projectId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -287,7 +281,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                _projectsService.Delete(projectId, actorId);
+                await _projectsService.Delete(projectId, actorId);
                 return Ok();
             }
             catch (Exception e)

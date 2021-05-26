@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +15,8 @@ using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
 using ProjectManager.Infrastructure.EFCore;
 using ProjectManager.Infrastructure.JWT;
+using ProjectManager.Infrastructure.Repositories.Projects;
+using ProjectManager.Infrastructure.Repositories.Tasks;
 using ProjectManager.Infrastructure.Repositories.Users;
 using ProjectManager.Infrastructure.Shared;
 using System;
@@ -35,9 +38,23 @@ namespace ProjectManager.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
             services.AddDbContext<ApplicationContext>();
-            services.AddTransient<IUsersService, UsersService>();
+
+            services.AddTransient<UsersService>();
+            services.AddTransient<IProjectsService, ProjectsService>();
+            services.AddTransient<ITasksService, TasksService>();
+
             services.AddScoped<UsersRepository>();
+            services.AddScoped<ProjectsRepository>();
+            services.AddScoped<TasksRepository>();
 
 
 

@@ -24,6 +24,7 @@ namespace ProjectManager.Domain.Entities
         public string HexColor { get; set; }
         public ProjectState State { get; set; }
         public ProjectType ProjectType { get; set; }
+        public ProjectPrivacy Privacy { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public Guid? CreatedById { get; set; }
@@ -44,5 +45,11 @@ namespace ProjectManager.Domain.Entities
     {
         Kanban,
         Scrum
+    }
+
+    public enum ProjectPrivacy
+    {
+        Public,
+        Private
     }
 }

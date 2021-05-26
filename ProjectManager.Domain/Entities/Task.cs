@@ -15,6 +15,7 @@ namespace ProjectManager.Domain.Entities
 
         public Guid StatusId { get; set; }
         public Status Status { get; set; }
+        public int Index { get; set; }
 
         public List<SubTask> SubTasks { get; set; } = new List<SubTask>();
         public DateTime? StartTime { get; set; }
