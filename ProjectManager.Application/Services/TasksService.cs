@@ -19,7 +19,7 @@ namespace ProjectManager.Application.Services
 
         public IAsyncEnumerable<Domain.Entities.Task> GetTasks(Specification<Domain.Entities.Task> spec)
         {
-            return _tasksRepository.ReadManyAsync(spec);
+            return _tasksRepository.ReadMany(spec);
         }
     }
 }

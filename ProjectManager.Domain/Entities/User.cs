@@ -31,7 +31,7 @@ namespace ProjectManager.Domain.Entities
         public List<Team> Teams { get; set; } = new List<Team>();
         public List<TeamUser> TeamUsers { get; set; } = new List<TeamUser>();
 
-        public List<Event> Actions { get; set; } = new List<Event>();
+        //public List<Event> Actions { get; set; } = new List<Event>();
     }
 
     public enum Sex

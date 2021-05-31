@@ -7,26 +7,26 @@ using System.Threading.Tasks;
 
 namespace ProjectManager.Domain.Entities
 {
-    public class Event : IGuidKey
-    {
-        public Guid Id { get; set; }
-        public EventType EventType { get; set; }
+    //public class Event : IGuidKey
+    //{
+    //    public Guid Id { get; set; }
+    //    public EventType EventType { get; set; }
 
-        public Guid? ActorId { get; set; }
-        public User Actor { get; set; }
+    //    public Guid? ActorId { get; set; }
+    //    public User Actor { get; set; }
 
-        public Guid? TargetId { get; set; }
-        public Task Target { get; set; }
+    //    public Guid? TargetId { get; set; }
+    //    public Task Target { get; set; }
 
-        public Guid? ProjectId { get; set; }
-        public Project Project { get; set; }
-        public DateTime CreatedAt { get; set; }
-    }
+    //    public Guid? ProjectId { get; set; }
+    //    public Project Project { get; set; }
+    //    public DateTime CreatedAt { get; set; }
+    //}
 
-    public enum EventType
-    {
-        Created,
-        Changed,
-        Deleted
-    }
+    //public enum EventType
+    //{
+    //    Created,
+    //    Changed,
+    //    Deleted
+    //}
 }

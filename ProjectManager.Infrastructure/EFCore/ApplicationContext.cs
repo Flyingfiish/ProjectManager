@@ -1,10 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjectManager.Domain.Entities;
 using ProjectManager.Infrastructure.Configurations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ProjectManager.Infrastructure.EFCore
 {
@@ -17,7 +13,7 @@ namespace ProjectManager.Infrastructure.EFCore
         public DbSet<TeamUser> TeamUsers { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<Status> Statuses { get; set; }
-        public DbSet<Event> Events { get; set; }
+        //public DbSet<Event> Events { get; set; }
         public DbSet<SubTask> SubTasks { get; set; }
 
         public ApplicationContext()

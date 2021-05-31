@@ -18,21 +18,18 @@ namespace ProjectManager.Domain.Entities
         public List<User> Members { get; set; } = new List<User>();
         public List<ProjectUser> ProjectUsers { get; set; } = new List<ProjectUser>();
 
+        public List<Status> Statuses { get; set; } = new List<Status>();
         public List<Task> Tasks { get; set; } = new List<Task>();
 
         public string Description { get; set; }
         public string HexColor { get; set; }
         public ProjectState State { get; set; }
-        public ProjectType ProjectType { get; set; }
+        public ProjectType Type { get; set; }
         public ProjectPrivacy Privacy { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public Guid? CreatedById { get; set; }
         public User CreatedBy { get; set; }
-
-        public List<Event> Events { get; set; } = new List<Event>();
-
-        public List<Status> Statuses { get; set; } = new List<Status>();
     }
 
     public enum ProjectState

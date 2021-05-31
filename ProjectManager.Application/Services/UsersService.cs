@@ -31,7 +31,7 @@ namespace ProjectManager.Application.Services
 
         public async Task<UserShortDto> GetUser(Specification<User> spec)
         {
-            User user = await _usersRepository.ReadOneAsync(spec);
+            User user = await _usersRepository.ReadOne(spec);
             if (user == null)
                 return null;
             return _mapper.Map<UserShortDto>(user);
@@ -39,7 +39,7 @@ namespace ProjectManager.Application.Services
 
         public async Task<UserBIODto> GetUserBIO(Specification<User> spec)
         {
-            User user = await _usersRepository.ReadOneAsync(spec);
+            User user = await _usersRepository.ReadOne(spec);
             if (user == null)
                 return null;
             return _mapper.Map<UserBIODto>(user);
@@ -61,12 +61,12 @@ namespace ProjectManager.Application.Services
 
         public async System.Threading.Tasks.Task Register(RegisterRequest registerDto, CancellationToken cancellationToken = default)
         {
-            await _usersRepository.CreateAsync(_mapper.Map<User>(registerDto));
+            await _usersRepository.Create(_mapper.Map<User>(registerDto));
         }
 
         public async System.Threading.Tasks.Task UpdatePassword(Guid userId, string oldPassword, string newPassword, string newPasswordConfirmation)
         {
-            User user = await _usersRepository.ReadOneAsync(new GetUserByIdSpecification(userId));
+            User user = await _usersRepository.ReadOne(new GetUserByIdSpecification(userId));
 
             if (user.HashPassword != PasswordHasher.GetHash(oldPassword))
                 throw new ArgumentException();
@@ -74,7 +74,7 @@ namespace ProjectManager.Application.Services
             if (newPassword != newPasswordConfirmation)
                 throw new ArgumentException();
 
-            _usersRepository.UpdateAsync(userId, u => u.HashPassword = PasswordHasher.GetHash(newPassword)).GetAwaiter();
+            _usersRepository.Update(userId, u => u.HashPassword = PasswordHasher.GetHash(newPassword)).GetAwaiter();
         }
 
         public async System.Threading.Tasks.Task UpdateUserBIO(UserBIODto userBIODto)

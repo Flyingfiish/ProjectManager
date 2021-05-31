@@ -17,9 +17,9 @@ namespace ProjectManager.Infrastructure.Configurations
                 .HasIndex(u => u.Login)
                 .IsUnique();
 
-            modelBuilder
-                .HasMany(u => u.Actions)
-                .WithOne(e => e.Actor);
+            //modelBuilder
+            //    .HasMany(u => u.Actions)
+            //    .WithOne(e => e.Actor);
 
             modelBuilder
                 .HasMany(u => u.Teams)

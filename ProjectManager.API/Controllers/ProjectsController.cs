@@ -43,7 +43,7 @@ namespace ProjectManager.API.Controllers
                 try
                 {
                     ProjectForCreateDto projectForCreate = JsonSerializer.Deserialize<ProjectForCreateDto>(body);
-                    
+
                     await _projectsService.Create(projectForCreate, createdById);
 
                     return Ok();
@@ -130,6 +130,57 @@ namespace ProjectManager.API.Controllers
         }
 
         [Authorize]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> MoveTask(Guid projectId, Guid taskId, Guid statusId, int index)
+        {
+            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
+            if (String.IsNullOrEmpty(id))
+            {
+                return Unauthorized();
+            }
+            Guid actorId = new Guid(id);
+
+            try
+            {
+                await _projectsService.MoveTask(projectId, taskId, statusId, index, actorId);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> CreateStatus(Guid projectId)
+        {
+            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
+            if (String.IsNullOrEmpty(id))
+            {
+                return Unauthorized();
+            }
+            Guid actorId = new Guid(id);
+
+            try
+            {
+                using (var reader = new StreamReader(Request.Body))
+                {
+                    var body = await reader.ReadToEndAsync();
+                    Status status = JsonSerializer.Deserialize<Status>(body);
+                    await _projectsService.CreateStatus(projectId, status, actorId);
+                    return Ok();
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
+            }
+        }
+
+        [Authorize]
         [HttpDelete]
         [Route("[action]")]
         public async Task<IActionResult> DeleteTask(Guid projectId, Guid taskId)
@@ -148,7 +199,7 @@ namespace ProjectManager.API.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
             }
         }
 

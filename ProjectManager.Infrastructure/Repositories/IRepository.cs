@@ -9,13 +9,11 @@ using System.Threading.Tasks;
 namespace ProjectManager.Infrastructure.Repositories
 {
     public interface IRepository<T> : IDisposable where T : class
-
-
     {
-        public void Create(T item);
-        public T ReadOne(Specification<T> spec);
-        public List<T> ReadMany(Specification<T> spec);
-        public void Update(Guid id, Action<T> func);
-        public void Delete(T item);
+        public Task Create(T item);
+        public Task<T> ReadOne(Specification<T> spec);
+        public IAsyncEnumerable<T> ReadMany(Specification<T> spec);
+        public Task Update(Guid id, Action<T> func);
+        public Task Delete(T item);
     }
 }

@@ -32,11 +32,11 @@ namespace ProjectManager.Infrastructure.Repositories.Teams
             _context.SaveChanges();
         }
 
-        public override Team ReadOne(Specification<Team> spec)
+        public async override Task<Team> ReadOne(Specification<Team> spec)
         {
-            return _entities
+            return await _entities
                 .Include(t => t.TeamUsers).ThenInclude(t => t.User)
-                .FirstOrDefault(spec.ToExpression());
+                .FirstOrDefaultAsync(spec.ToExpression());
         }
 
         public void AddMember(Guid teamId, Guid memberId)

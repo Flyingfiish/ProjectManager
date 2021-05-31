@@ -17,6 +17,8 @@ namespace ProjectManager.Application.Interfaces
         System.Threading.Tasks.Task DeleteMember(Guid projectId, Guid memberId, Guid actorId);
         System.Threading.Tasks.Task CreateTask(Guid projectId, Domain.Entities.Task task, Guid actorId);
         System.Threading.Tasks.Task DeleteTask(Guid projectId, Guid taskId, Guid actorId);
+        System.Threading.Tasks.Task MoveTask(Guid projectId, Guid taskId, Guid statusId, int index, Guid actorId);
+        System.Threading.Tasks.Task CreateStatus(Guid projectId, Status status, Guid actorId);
         System.Threading.Tasks.Task UpdateManager(Guid projectId, Guid managerId, Guid actorId);
         Task<List<StatusDto>> GetStatuses(Guid projectId, Guid actorId);
         Task<ProjectDto> GetProject(Guid projectId, Guid actorId);

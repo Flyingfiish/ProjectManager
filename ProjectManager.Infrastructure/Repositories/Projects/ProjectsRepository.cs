@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectManager.Domain.Entities;
 using ProjectManager.Domain.Specifications;
+using ProjectManager.Domain.Specifications.Common;
 using ProjectManager.Domain.Specifications.Projects;
 using ProjectManager.Domain.Specifications.Users;
 using ProjectManager.Infrastructure.EFCore;
@@ -16,32 +17,19 @@ namespace ProjectManager.Infrastructure.Repositories.Projects
 {
     public class ProjectsRepository : Repository<Project>, IProjectsRepository
     {
-        
+
 
         public ProjectsRepository(ApplicationContext context) : base(context)
         {
         }
 
-        public async Task<ParticipationType> AuthorizeUserAsync(Guid userId, Guid projectId)
+        public async Task<ParticipationType> ReadParticipationType(Guid userId, Guid projectId)
         {
             ProjectUser projectUser = await _context.ProjectUsers.FirstOrDefaultAsync(p => p.UserId == userId);
             return projectUser.ParticipationType;
         }
 
-        public void AddMember(Guid projectId, Guid memberId, ParticipationType participationType)
-        {
-            _context.ProjectUsers.Add(
-                new ProjectUser()
-                {
-                    ProjectId = projectId,
-                    TeamId = null,
-                    UserId = memberId,
-                    ParticipationType = participationType
-                });
-            _context.SaveChanges();
-        }
-
-        public async System.Threading.Tasks.Task AddMemberAsync(Guid projectId, Guid memberId, ParticipationType participationType)
+        public async System.Threading.Tasks.Task AddMember(Guid projectId, Guid memberId, ParticipationType participationType)
         {
             _context.ProjectUsers.Add(
                 new ProjectUser()
@@ -54,90 +42,70 @@ namespace ProjectManager.Infrastructure.Repositories.Projects
             await _context.SaveChangesAsync();
         }
 
-        public void DeleteMember(Guid projectId, Guid memberId)
-        {
-            var participation = _context.ProjectUsers.FirstOrDefault(p => p.ProjectId == projectId && p.UserId == memberId);
-            _context.ProjectUsers.Remove(participation);
-            _context.SaveChanges();
-        }
-
-        public async System.Threading.Tasks.Task DeleteMemberAsync(Guid projectId, Guid memberId)
+        public async System.Threading.Tasks.Task DeleteMember(Guid projectId, Guid memberId)
         {
             var participation = _context.ProjectUsers.FirstOrDefault(p => p.ProjectId == projectId && p.UserId == memberId);
             _context.ProjectUsers.Remove(participation);
             await _context.SaveChangesAsync();
         }
 
-        public void CreateTask(Guid projectId, Domain.Entities.Task task)
+        public async Task<Project> ReadOneIncludeStatuses(Specification<Project> spec)
         {
-            Project project = ReadOne(new GetProjectByIdSpecification(projectId));
-            project.Tasks.Add(task);
-            Event e =
-                new Event()
-                {
-                    Actor = task.CreatedBy,
-                    EventType = EventType.Created,
-                    CreatedAt = DateTime.Now,
-                    Target = task
-                };
-            project.Events.Add(e);
-            _context.SaveChanges();
+            return await _entities
+                .Include(p => p.Statuses).ThenInclude(s => s.Tasks)
+                .FirstOrDefaultAsync(spec.ToExpression());
         }
 
-        public async System.Threading.Tasks.Task CreateTaskAsync(Guid projectId, Domain.Entities.Task task)
+        public async System.Threading.Tasks.Task CreateTask(Guid projectId, Domain.Entities.Task task)
         {
-           
-            Project project = ReadOne(new GetProjectByIdSpecification(projectId));
+
+            Project project = await ReadOneIncludeStatuses(new GetByIdSpecification<Project>(projectId));
+            task.Index = project.Statuses.FirstOrDefault(new GetByIdSpecification<Status>(task.StatusId)).Tasks.Count;
             project.Tasks.Add(task);
-            Event e =
-                new Event()
-                {
-                    Actor = task.CreatedBy,
-                    EventType = EventType.Created,
-                    CreatedAt = DateTime.Now,
-                    Target = task
-                };
-            project.Events.Add(e);
             await _context.SaveChangesAsync();
         }
 
-        public void DeleteTask(Guid projectId, Guid taskId)
+        public async System.Threading.Tasks.Task MoveTask(Guid projectId, Guid taskId, Guid statusId, int index)
         {
-            Domain.Entities.Task task = _context.Tasks.FirstOrDefault(t => t.Id == taskId);
-            _entities.FirstOrDefault(p => p.Id == projectId).Tasks.Remove(task);
-            _context.SaveChanges();
+            Project project = await ReadOneIncludeStatuses(new GetByIdSpecification<Project>(projectId));
+
+            var status = project.Statuses.FirstOrDefault(s => s.Id == statusId);
+
+            var movingTask = project.Tasks.FirstOrDefault(t => t.Id == taskId);
+
+            if (movingTask.Index == index && movingTask.StatusId == statusId)
+                return;
+
+            movingTask.Index = index;
+            movingTask.StatusId = statusId;
+
+            foreach (var task in status.Tasks.Where(t => t.Index >= index && t.Id != taskId))
+            {
+                task.Index += 1;
+            }
+
+            await _context.SaveChangesAsync();
+
         }
 
-        public async System.Threading.Tasks.Task DeleteTaskAsync(Guid projectId, Guid taskId)
+        public async System.Threading.Tasks.Task DeleteTask(Guid projectId, Guid taskId)
         {
             Domain.Entities.Task task = _context.Tasks.FirstOrDefault(t => t.Id == taskId);
-            _entities.FirstOrDefault(p => p.Id == projectId).Tasks.Remove(task);
+            _context.Tasks.Remove(task);
             await _context.SaveChangesAsync();
         }
 
-        public void UpdateManager(Guid projectId, Guid managerId)
+        public async System.Threading.Tasks.Task CreateStatus(Guid projectId, Status status)
         {
-            Project project = ReadOne(new GetProjectByIdSpecification(projectId));
-
-            if (project.ManagerId != null)
-                _context
-                    .ProjectUsers
-                    .FirstOrDefault(p => p.ProjectId == projectId && p.UserId == project.ManagerId)
-                    .ParticipationType = ParticipationType.Expert;
-
-            _context
-                .ProjectUsers
-                .FirstOrDefault(p => p.ProjectId == projectId && p.UserId == managerId)
-                .ParticipationType = ParticipationType.ProjectManager;
-
-            project.ManagerId = managerId;
-
-            _context.SaveChanges();
+            Project project = await ReadOneIncludeStatuses(new GetProjectByIdSpecification(projectId));
+            status.Index = project.Statuses.Count;
+            project.Statuses.Add(status);
+            await _context.SaveChangesAsync();
         }
 
-        public async System.Threading.Tasks.Task UpdateManagerAsync(Guid projectId, Guid managerId)
+        public async System.Threading.Tasks.Task UpdateManager(Guid projectId, Guid managerId)
         {
-            Project project = ReadOne(new GetProjectByIdSpecification(projectId));
+            Project project = await ReadOne(new GetProjectByIdSpecification(projectId));
 
             if (project.ManagerId != null)
                 _context
@@ -155,62 +123,29 @@ namespace ProjectManager.Infrastructure.Repositories.Projects
             await _context.SaveChangesAsync();
         }
 
-        public Project ReadOneIncludeAll(Specification<Project> spec)
-        {
-            return _entities
-                .Include(p => p.ProjectUsers).ThenInclude(p => p.User)
-                .Include(p => p.CreatedBy)
-                .Include(p => p.Manager)
-                .Include(p => p.Events)
-                .Include(p => p.Statuses)
-                .Include(p => p.Tasks)
-                .FirstOrDefault(spec.ToExpression());
-        }
-
-        public async System.Threading.Tasks.Task<Project> ReadOneIncludeAllAsync(Specification<Project> spec)
+        public async Task<Project> ReadOneIncludeAll(Specification<Project> spec)
         {
             return await _entities
                 .Include(p => p.ProjectUsers).ThenInclude(p => p.User)
                 .Include(p => p.CreatedBy)
                 .Include(p => p.Manager)
-                .Include(p => p.Events)
+                //.Include(p => p.Events)
                 .Include(p => p.Statuses)
                 .Include(p => p.Tasks)
                 .FirstOrDefaultAsync(spec.ToExpression());
         }
 
-        public async Task<List<Status>> ReadStatusesAsync(Specification<Project> spec)
+        public async Task<List<Status>> ReadStatuses(Specification<Project> spec)
         {
             var project = await _entities
                 .Include(p => p.Statuses)
-                .ThenInclude(s => s.Tasks)
+                .ThenInclude(s => s.Tasks.OrderBy(t => t.Index))
                 .ThenInclude(t => t.Assignees)
                 .FirstOrDefaultAsync(spec.ToExpression());
             return project.Statuses;
         }
 
-        public void AddTeam(Guid projectId, Guid teamId)
-        {
-            var team = _context.Teams.Include(t => t.TeamUsers).FirstOrDefault(t => t.Id == teamId);
-
-            var participations = new List<ProjectUser>();
-            foreach (var e in team.TeamUsers)
-            {
-                participations.Add(new ProjectUser()
-                {
-                    ProjectId = projectId,
-                    TeamId = e.TeamId,
-                    UserId = e.UserId,
-                    ParticipationType = e.ParticipationType
-                });
-            }
-
-            _context.ProjectUsers.AddRange(participations);
-
-            _context.SaveChanges();
-        }
-
-        public async System.Threading.Tasks.Task AddTeamAsync(Guid projectId, Guid teamId)
+        public async System.Threading.Tasks.Task AddTeam(Guid projectId, Guid teamId)
         {
             var team = _context.Teams.Include(t => t.TeamUsers).FirstOrDefault(t => t.Id == teamId);
 
@@ -231,16 +166,7 @@ namespace ProjectManager.Infrastructure.Repositories.Projects
             await _context.SaveChangesAsync();
         }
 
-        public void DeleteTeam(Guid projectId, Guid teamId)
-        {
-            var participations = _context.ProjectUsers.Where(p => p.TeamId == teamId);
-
-            _context.ProjectUsers.RemoveRange(participations);
-
-            _context.SaveChanges();
-        }
-
-        public async System.Threading.Tasks.Task DeleteTeamAsync(Guid projectId, Guid teamId)
+        public async System.Threading.Tasks.Task DeleteTeam(Guid projectId, Guid teamId)
         {
             var participations = _context.ProjectUsers.Where(p => p.TeamId == teamId);
 
@@ -249,23 +175,13 @@ namespace ProjectManager.Infrastructure.Repositories.Projects
             await _context.SaveChangesAsync();
         }
 
-        public void Delete(Guid projectId)
-        {
-            var project = _context.Projects.FirstOrDefault(p => p.Id == projectId);
-            project.Statuses.Clear();
-            _entities.Remove(project);
-            _context.SaveChanges();
-        }
-
-        public async System.Threading.Tasks.Task DeleteAsync(Guid projectId)
+        public async System.Threading.Tasks.Task Delete(Guid projectId)
         {
             var project = _context.Projects.FirstOrDefault(p => p.Id == projectId);
             project.Statuses.Clear();
             _entities.Remove(project);
             await _context.SaveChangesAsync();
         }
-
-       
 
         public async Task<bool> IsAllowedToGet(Guid projectId, Guid userId)
         {

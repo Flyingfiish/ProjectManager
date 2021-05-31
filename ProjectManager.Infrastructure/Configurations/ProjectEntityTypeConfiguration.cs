@@ -46,10 +46,10 @@ namespace ProjectManager.Infrastructure.Configurations
                 .HasOne(p => p.CreatedBy)
                 .WithMany(u => u.CreatedProjects)
                 .OnDelete(DeleteBehavior.NoAction);
-            modelBuilder
-                .HasMany(p => p.Events)
-                .WithOne(e => e.Project)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder
+            //    .HasMany(p => p.Events)
+            //    .WithOne(e => e.Project)
+            //    .OnDelete(DeleteBehavior.NoAction);
             modelBuilder
                 .HasMany(p => p.Tasks)
                 .WithOne(t => t.Project)
