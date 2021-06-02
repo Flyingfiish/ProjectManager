@@ -5,7 +5,6 @@ using ProjectManager.Domain.Specifications;
 using ProjectManager.Domain.Specifications.Common;
 using ProjectManager.Domain.Specifications.ProjectParticipations;
 using ProjectManager.Infrastructure.Repositories;
-using ProjectManager.Infrastructure.Repositories.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;

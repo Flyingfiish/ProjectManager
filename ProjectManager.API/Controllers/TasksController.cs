@@ -41,6 +41,7 @@ namespace ProjectManager.API.Controllers
                 {
                     var body = await reader.ReadToEndAsync();
                     Domain.Entities.Task task = JsonSerializer.Deserialize<Domain.Entities.Task>(body);
+                    task.CreatedById = actorId;
                     await _tasksService.Create(task, actorId);
                     return Ok();
                 }
