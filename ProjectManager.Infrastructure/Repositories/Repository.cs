@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using ProjectManager.Domain.Interfaces;
 using ProjectManager.Domain.Specifications;
 using ProjectManager.Infrastructure.EFCore;
+using ProjectManager.Infrastructure.Extentions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ProjectManager.Infrastructure.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class, IGuidKey, new()
+    public class Repository<T> : IRepository<T> where T : class, new()
     {
         protected ApplicationContext _context;
         protected DbSet<T> _entities;
@@ -29,11 +31,12 @@ namespace ProjectManager.Infrastructure.Repositories
             _context.Entry(item).State = EntityState.Detached;
         }
 
-        public async virtual Task Delete(T item)
+        public async virtual Task Delete(Specification<T> spec)
         {
-            _entities.Remove(item);
+            List<T> entity = await _entities.Where(spec.ToExpression()).ToListAsync();
+            _entities.RemoveRange(entity);
             await _context.SaveChangesAsync();
-            _context.Entry(item).State = EntityState.Detached;
+            _context.Entry(entity).State = EntityState.Detached;
         }
 
         public void Dispose()
@@ -41,23 +44,40 @@ namespace ProjectManager.Infrastructure.Repositories
             _context.DisposeAsync();
         }
 
+        public async virtual Task<T> ReadOne(Specification<T> spec)
+        {
+            IQueryable<T> query = _context.Set<T>();
+            if (spec.Includes != null)
+            {
+                query = spec.Includes(query);
+            }
+
+            return await query
+                .AsNoTracking()
+                .FirstOrDefaultAsync(spec.ToExpression());
+        }
+
         public async IAsyncEnumerable<T> ReadMany(Specification<T> spec)
         {
-            IAsyncEnumerator<T> enumerator = _entities.Where(spec.ToExpression()).AsAsyncEnumerable().GetAsyncEnumerator();
-            while(await enumerator.MoveNextAsync())
+            IQueryable<T> query = _context.Set<T>();
+            if (spec.Includes != null)
+            {
+                query = spec.Includes(query);
+            }
+            IAsyncEnumerator<T> enumerator = query
+                .AsNoTracking()
+                .Where(spec.ToExpression())
+                .AsAsyncEnumerable()
+                .GetAsyncEnumerator();
+            while (await enumerator.MoveNextAsync())
             {
                 yield return enumerator.Current;
             }
         }
 
-        public async virtual Task<T> ReadOne(Specification<T> spec)
+        public async Task Update(Specification<T> spec, Action<T> func)
         {
-            return await _entities.FirstOrDefaultAsync(spec.ToExpression());
-        }
-
-        public async Task Update(Guid id, Action<T> func)
-        {
-            T entity = await _entities.FirstOrDefaultAsync(e => e.Id == id);
+            T entity = await _entities.FirstOrDefaultAsync(spec.ToExpression());
             func(entity);
             await _context.SaveChangesAsync();
             _context.Entry(entity).State = EntityState.Detached;

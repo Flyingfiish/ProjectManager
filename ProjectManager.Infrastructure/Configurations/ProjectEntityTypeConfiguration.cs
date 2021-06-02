@@ -16,14 +16,14 @@ namespace ProjectManager.Infrastructure.Configurations
             modelBuilder
                 .HasMany(p => p.Members)
                 .WithMany(u => u.AssignedProjects)
-                .UsingEntity<ProjectUser>(
+                .UsingEntity<ProjectParticipation>(
                 p => p
                 .HasOne(p => p.User)
-                .WithMany(p => p.ProjectUsers)
+                .WithMany(p => p.ProjectParticipations)
                 .HasForeignKey(p => p.UserId),
                 p => p
                 .HasOne(p => p.Project)
-                .WithMany(p => p.ProjectUsers)
+                .WithMany(p => p.Participations)
                 .HasForeignKey(p => p.ProjectId),
                 p =>
                 {
@@ -38,10 +38,6 @@ namespace ProjectManager.Infrastructure.Configurations
                     .OnDelete(DeleteBehavior.NoAction);
                 });
 
-            modelBuilder
-                .HasOne(p => p.Manager)
-                .WithMany(u => u.ManagedProjects)
-                .OnDelete(DeleteBehavior.NoAction);
             modelBuilder
                 .HasOne(p => p.CreatedBy)
                 .WithMany(u => u.CreatedProjects)

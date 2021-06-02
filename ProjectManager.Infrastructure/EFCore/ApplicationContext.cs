@@ -8,13 +8,14 @@ namespace ProjectManager.Infrastructure.EFCore
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Project> Projects { get; set; }
-        public DbSet<ProjectUser> ProjectUsers { get; set; }
+        public DbSet<ProjectParticipation> ProjectUsers { get; set; }
         public DbSet<Team> Teams { get; set; }
-        public DbSet<TeamUser> TeamUsers { get; set; }
+        public DbSet<TeamParticipation> TeamUsers { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<Status> Statuses { get; set; }
         //public DbSet<Event> Events { get; set; }
         public DbSet<SubTask> SubTasks { get; set; }
+        public DbSet<TaskParticipation> TaskParticipations { get; set; }
 
         public ApplicationContext()
         {

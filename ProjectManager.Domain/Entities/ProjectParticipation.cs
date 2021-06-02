@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ProjectManager.Domain.Entities
 {
-    public class ProjectUser : IGuidKey
+    public class ProjectParticipation : IGuidKey
     {
         public Guid Id { get; set; }
 
@@ -26,9 +26,9 @@ namespace ProjectManager.Domain.Entities
     public enum ParticipationType
     {
         Creator,
+        ProjectManager,
         Expert,
         TeamLeader,
-        ProjectManager,
         Executor
     }
 }

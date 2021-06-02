@@ -14,7 +14,25 @@ namespace ProjectManager.Infrastructure.Configurations
         {
             modelBuilder
                .HasMany(t => t.Assignees)
-               .WithMany(u => u.Tasks);
+               .WithMany(u => u.Tasks)
+               .UsingEntity<TaskParticipation>(
+                tp => tp
+                .HasOne(tp => tp.User)
+                .WithMany(u => u.TaskParticipations)
+                .HasForeignKey(tp => tp.UserId),
+                tp => tp
+                .HasOne(tp => tp.Task)
+                .WithMany(t => t.TaskParticipations)
+                .HasForeignKey(tp => tp.TaskId),
+                tp =>
+                {
+                    tp.HasKey(tp => new
+                    {
+                        tp.TaskId,
+                        tp.UserId
+                    });
+                }
+                );
             modelBuilder
                .HasOne(t => t.Status)
                .WithMany(s => s.Tasks);

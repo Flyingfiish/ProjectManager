@@ -27,9 +27,9 @@ namespace ProjectManager.API.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly UsersService _usersService;
+        private readonly IUsersService _usersService;
 
-        public UsersController(UsersService usersService)
+        public UsersController(IUsersService usersService)
         {
             _usersService = usersService;
         }
@@ -87,7 +87,7 @@ namespace ProjectManager.API.Controllers
             {
                 return Unauthorized();
             }
-            var user = await _usersService.GetUser(new GetUserByIdSpecification(new Guid(id)));
+            var user = await _usersService.GetShortUser(new GetUserByIdSpecification(new Guid(id)));
             return Ok(user);
         }
 
@@ -121,7 +121,7 @@ namespace ProjectManager.API.Controllers
 
         private async Task<ClaimsIdentity> GetIdentity(string login, string password)
         {
-            UserShortDto person = await _usersService.GetUser(new GetUserByLoginPassSpecification(login, PasswordHasher.GetHash(password)));
+            UserShortDto person = await _usersService.GetShortUser(new GetUserByLoginPassSpecification(login, PasswordHasher.GetHash(password)));
             if (person != null)
             {
                 var claims = new List<Claim>

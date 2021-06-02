@@ -1,4 +1,5 @@
-﻿using ProjectManager.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using ProjectManager.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

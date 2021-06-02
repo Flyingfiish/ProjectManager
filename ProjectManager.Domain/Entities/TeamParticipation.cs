@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectManager.Domain.Entities
 {
-    public class TeamUser
+    public class TeamParticipation
     {
         public Guid TeamId { get; set; }
         public Team Team { get; set; }

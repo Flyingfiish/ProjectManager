@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using ProjectManager.Application.DTOs.Project;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Domain.Entities;
+using ProjectManager.Domain.Specifications.Common;
+using ProjectManager.Domain.Specifications.ProjectParticipations;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -101,107 +103,7 @@ namespace ProjectManager.API.Controllers
             }
         }
 
-        [Authorize]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<IActionResult> CreateTask(Guid projectId)
-        {
-            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-            if (String.IsNullOrEmpty(id))
-            {
-                return Unauthorized();
-            }
-            Guid actorId = new Guid(id);
-
-            try
-            {
-                using (var reader = new StreamReader(Request.Body))
-                {
-                    var body = await reader.ReadToEndAsync();
-                    Domain.Entities.Task task = JsonSerializer.Deserialize<Domain.Entities.Task>(body);
-                    await _projectsService.CreateTask(projectId, task, actorId);
-                    return Ok();
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
-            }
-        }
-
-        [Authorize]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<IActionResult> MoveTask(Guid projectId, Guid taskId, Guid statusId, int index)
-        {
-            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-            if (String.IsNullOrEmpty(id))
-            {
-                return Unauthorized();
-            }
-            Guid actorId = new Guid(id);
-
-            try
-            {
-                await _projectsService.MoveTask(projectId, taskId, statusId, index, actorId);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
-            }
-        }
-
-        [Authorize]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<IActionResult> CreateStatus(Guid projectId)
-        {
-            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-            if (String.IsNullOrEmpty(id))
-            {
-                return Unauthorized();
-            }
-            Guid actorId = new Guid(id);
-
-            try
-            {
-                using (var reader = new StreamReader(Request.Body))
-                {
-                    var body = await reader.ReadToEndAsync();
-                    Status status = JsonSerializer.Deserialize<Status>(body);
-                    await _projectsService.CreateStatus(projectId, status, actorId);
-                    return Ok();
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
-            }
-        }
-
-        [Authorize]
-        [HttpDelete]
-        [Route("[action]")]
-        public async Task<IActionResult> DeleteTask(Guid projectId, Guid taskId)
-        {
-            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-            if (String.IsNullOrEmpty(id))
-            {
-                return Unauthorized();
-            }
-            Guid actorId = new Guid(id);
-
-            try
-            {
-                await _projectsService.DeleteTask(projectId, taskId, actorId);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
-            }
-        }
+        
 
         [Authorize]
         [HttpPost]
@@ -240,7 +142,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                var response = await _projectsService.GetProject(projectId, actorId);
+                var response = await _projectsService.GetProject(new GetByIdSpecification<Project>(projectId), new GetProjectParticipationByKeySpec(projectId, actorId));
                 return Ok(response);
             }
             catch (Exception e)
@@ -249,28 +151,7 @@ namespace ProjectManager.API.Controllers
             }
         }
 
-        [Authorize]
-        [HttpGet]
-        [Route("[action]")]
-        public async Task<IActionResult> GetProjectTasks(Guid projectId)
-        {
-            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-            if (String.IsNullOrEmpty(id))
-            {
-                return Unauthorized();
-            }
-            Guid actorId = new Guid(id);
-
-            try
-            {
-                var response = await _projectsService.GetProjectTasks(projectId, actorId);
-                return Ok(response);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        
 
         [Authorize]
         [HttpPost]

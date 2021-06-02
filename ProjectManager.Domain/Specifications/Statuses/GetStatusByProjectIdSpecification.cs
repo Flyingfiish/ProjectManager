@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace ProjectManager.Domain.Specifications.Statuses
 {
-    public class GetStatusByIdSpecification : Specification<Status>
+    public class GetStatusByProjectIdSpecification : Specification<Status>
     {
-        public GetStatusByIdSpecification(Guid id)
+        public GetStatusByProjectIdSpecification(Guid projectId)
         {
-            Predicate = p => p.Id == id;
+            Predicate = p => p.ProjectId == projectId;
         }
     }
 }

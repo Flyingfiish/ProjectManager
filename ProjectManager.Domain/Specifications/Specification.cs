@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Query;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,6 +15,8 @@ namespace ProjectManager.Domain.Specifications
         private Func<T, bool> Function => _function ??= Predicate.Compile();
 
         protected Expression<Func<T, bool>> Predicate;
+
+        public Func<IQueryable<T>, IIncludableQueryable<T, object>> Includes { get; set; }
 
         protected Specification() { }
 
