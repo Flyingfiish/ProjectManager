@@ -12,6 +12,8 @@ namespace ProjectManager.Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
         public SubTaskStatus Status { get; set; }
+
+        public Guid TaskId { get; set; }
         public Task Task { get; set; }
     }
 

@@ -13,7 +13,7 @@ namespace ProjectManager.Infrastructure.Repositories
         public Task Create(T item);
         public Task<T> ReadOne(Specification<T> spec);
         public IAsyncEnumerable<T> ReadMany(Specification<T> spec);
-        public Task Update(Guid id, Action<T> func);
-        public Task Delete(T item);
+        public Task Update(Specification<T> spec, Action<T> func);
+        public Task Delete(Specification<T> spec);
     }
 }

@@ -24,10 +24,10 @@ namespace ProjectManager.Infrastructure.Configurations
             modelBuilder
                 .HasMany(u => u.Teams)
                 .WithMany(t => t.Members)
-                .UsingEntity<TeamUser>(
+                .UsingEntity<TeamParticipation>(
                 t => t
                 .HasOne(t => t.Team)
-                .WithMany(u => u.TeamUsers)
+                .WithMany(u => u.Participations)
                 .HasForeignKey(t => t.TeamId),
                 t => t
                 .HasOne(t => t.User)

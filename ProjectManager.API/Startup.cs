@@ -13,11 +13,12 @@ using Microsoft.OpenApi.Models;
 using ProjectManager.Application;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
+using ProjectManager.Domain.Entities;
 using ProjectManager.Infrastructure.EFCore;
 using ProjectManager.Infrastructure.JWT;
+using ProjectManager.Infrastructure.Repositories;
 using ProjectManager.Infrastructure.Repositories.Projects;
 using ProjectManager.Infrastructure.Repositories.Tasks;
-using ProjectManager.Infrastructure.Repositories.Users;
 using ProjectManager.Infrastructure.Shared;
 using System;
 using System.Collections.Generic;
@@ -48,11 +49,20 @@ namespace ProjectManager.API
 
             services.AddDbContext<ApplicationContext>();
 
-            services.AddTransient<UsersService>();
+            services.AddTransient<IUsersService, UsersService>();
             services.AddTransient<IProjectsService, ProjectsService>();
             services.AddTransient<ITasksService, TasksService>();
+            services.AddTransient<IPolicyService, PolicyService>();
 
-            services.AddScoped<UsersRepository>();
+            services.AddScoped<IRepository<User>, Repository<User>>();
+            services.AddScoped<IRepository<Domain.Entities.Task>, Repository<Domain.Entities.Task>>();
+            services.AddScoped<IRepository<Project>, Repository<Project>>();
+            services.AddScoped<IRepository<ProjectParticipation>, Repository<ProjectParticipation>>();
+            services.AddScoped<IRepository<Status>, Repository<Status>>();
+            services.AddScoped<IRepository<TaskParticipation>, Repository<TaskParticipation>>();
+            services.AddScoped<IRepository<TeamParticipation>, Repository<TeamParticipation>>();
+            services.AddScoped<IRepository<Team>, Repository<Team>>();
+
             services.AddScoped<ProjectsRepository>();
             services.AddScoped<TasksRepository>();
 

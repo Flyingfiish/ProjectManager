@@ -20,16 +20,16 @@ namespace ProjectManager.Domain.Entities
         public string HexColor { get; set; }
 
         public List<Project> AssignedProjects { get; set; } = new List<Project>();
-        public List<ProjectUser> ProjectUsers { get; set; } = new List<ProjectUser>();
+        public List<ProjectParticipation> ProjectParticipations { get; set; } = new List<ProjectParticipation>();
 
         public List<Project> CreatedProjects { get; set; } = new List<Project>();
-        public List<Project> ManagedProjects { get; set; } = new List<Project>();
 
         public List<Task> Tasks { get; set; } = new List<Task>();
+        public List<TaskParticipation> TaskParticipations { get; set; } = new List<TaskParticipation>();
         public List<Task> CreatedTasks { get; set; } = new List<Task>();
 
         public List<Team> Teams { get; set; } = new List<Team>();
-        public List<TeamUser> TeamUsers { get; set; } = new List<TeamUser>();
+        public List<TeamParticipation> TeamUsers { get; set; } = new List<TeamParticipation>();
 
         //public List<Event> Actions { get; set; } = new List<Event>();
     }

@@ -12,11 +12,8 @@ namespace ProjectManager.Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
 
-        public Guid? ManagerId { get; set; }
-        public User Manager { get; set; }
-
         public List<User> Members { get; set; } = new List<User>();
-        public List<ProjectUser> ProjectUsers { get; set; } = new List<ProjectUser>();
+        public List<ProjectParticipation> Participations { get; set; } = new List<ProjectParticipation>();
 
         public List<Status> Statuses { get; set; } = new List<Status>();
         public List<Task> Tasks { get; set; } = new List<Task>();

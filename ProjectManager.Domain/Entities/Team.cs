@@ -11,7 +11,7 @@ namespace ProjectManager.Domain.Entities
     {
         public Guid Id { get; set; }
 
-        public List<TeamUser> TeamUsers { get; set; } = new List<TeamUser>();
+        public List<TeamParticipation> Participations { get; set; } = new List<TeamParticipation>();
         public List<User> Members { get; set; } = new List<User>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

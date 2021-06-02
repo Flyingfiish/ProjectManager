@@ -15,7 +15,7 @@ namespace ProjectManager.Application
     {
         public MappingProfile()
         {
-            CreateMap<ProjectUser, ProjectProjectUserDto>();
+            CreateMap<ProjectParticipation, ProjectProjectUserDto>();
             CreateMap<Project, ProjectPreviewDto>();
             CreateMap<Project, ProjectDto>();
             CreateMap<ProjectForCreateDto, Project>();

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using ProjectManager.Application.DTOs.Project;
 using ProjectManager.Application.DTOs.Task;
 using ProjectManager.Application.DTOs.User;
@@ -7,8 +8,8 @@ using ProjectManager.Domain.Entities;
 using ProjectManager.Domain.Specifications;
 using ProjectManager.Domain.Specifications.Users;
 using ProjectManager.Infrastructure.EFCore;
+using ProjectManager.Infrastructure.Extentions;
 using ProjectManager.Infrastructure.Repositories;
-using ProjectManager.Infrastructure.Repositories.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,42 +21,50 @@ namespace ProjectManager.Application.Services
 {
     public class UsersService : IUsersService
     {
-        private readonly UsersRepository _usersRepository;
+        private readonly IRepository<User> _usersRepository;
         private readonly IMapper _mapper;
 
-        public UsersService(UsersRepository usersRepository, IMapper mapper)
+        public UsersService(IRepository<User> usersRepository, IMapper mapper)
         {
             _usersRepository = usersRepository;
             _mapper = mapper;
         }
 
-        public async Task<UserShortDto> GetUser(Specification<User> spec)
+        public async Task<UserShortDto> GetShortUser(Specification<User> spec)
         {
             User user = await _usersRepository.ReadOne(spec);
-            if (user == null)
-                return null;
+
             return _mapper.Map<UserShortDto>(user);
         }
 
         public async Task<UserBIODto> GetUserBIO(Specification<User> spec)
         {
             User user = await _usersRepository.ReadOne(spec);
-            if (user == null)
-                return null;
+
             return _mapper.Map<UserBIODto>(user);
         }
 
         public async Task<IEnumerable<ProjectPreviewDto>> GetUserProjects(Specification<User> spec)
         {
-            IEnumerable<Project> projects = await _usersRepository.ReadUserWithProjectsAsync(spec);
+            spec.Includes = u => u.Include(u => u.AssignedProjects);
+
+            User user = await _usersRepository.ReadOne(spec);
+
+            IEnumerable<Project> projects = user.AssignedProjects;
             var result = _mapper.Map<List<ProjectPreviewDto>>(projects);
+
             return result;
         }
 
         public async Task<IEnumerable<TaskPreviewDto>> GetUserTasks(Specification<User> spec)
         {
-            IEnumerable<Domain.Entities.Task> tasks = await _usersRepository.ReadUserWithTasksAsync(spec);
+            spec.Includes = u => u.Include(u => u.Tasks);
+
+            User user = await _usersRepository.ReadOne(spec);
+
+            IEnumerable<Domain.Entities.Task> tasks = user.Tasks;
             var result = _mapper.Map<List<TaskPreviewDto>>(tasks);
+
             return result;
         }
 
@@ -64,9 +73,17 @@ namespace ProjectManager.Application.Services
             await _usersRepository.Create(_mapper.Map<User>(registerDto));
         }
 
-        public async System.Threading.Tasks.Task UpdatePassword(Guid userId, string oldPassword, string newPassword, string newPasswordConfirmation)
+        public async System.Threading.Tasks.Task Update(Specification<User> spec, Action<User> func, Guid actorId)
         {
-            User user = await _usersRepository.ReadOne(new GetUserByIdSpecification(userId));
+            User user = await _usersRepository.ReadOne(spec);
+            if (user.Id == actorId)
+                throw new Exception("You do not have rights");
+            await _usersRepository.Update(spec, func);
+        }
+
+        public async System.Threading.Tasks.Task UpdatePassword(Specification<User> spec, string oldPassword, string newPassword, string newPasswordConfirmation, Guid actorId)
+        {
+            User user = await _usersRepository.ReadOne(spec);
 
             if (user.HashPassword != PasswordHasher.GetHash(oldPassword))
                 throw new ArgumentException();
@@ -74,12 +91,7 @@ namespace ProjectManager.Application.Services
             if (newPassword != newPasswordConfirmation)
                 throw new ArgumentException();
 
-            _usersRepository.Update(userId, u => u.HashPassword = PasswordHasher.GetHash(newPassword)).GetAwaiter();
-        }
-
-        public async System.Threading.Tasks.Task UpdateUserBIO(UserBIODto userBIODto)
-        {
-            throw new NotImplementedException();
+            _usersRepository.Update(spec, u => u.HashPassword = PasswordHasher.GetHash(newPassword)).GetAwaiter();
         }
     }
 }
