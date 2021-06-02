@@ -11,7 +11,6 @@ using ProjectManager.Domain.Specifications.Common;
 using ProjectManager.Domain.Specifications.ProjectParticipations;
 using ProjectManager.Domain.Specifications.Projects;
 using ProjectManager.Infrastructure.Repositories;
-using ProjectManager.Infrastructure.Repositories.Projects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -17,8 +17,6 @@ using ProjectManager.Domain.Entities;
 using ProjectManager.Infrastructure.EFCore;
 using ProjectManager.Infrastructure.JWT;
 using ProjectManager.Infrastructure.Repositories;
-using ProjectManager.Infrastructure.Repositories.Projects;
-using ProjectManager.Infrastructure.Repositories.Tasks;
 using ProjectManager.Infrastructure.Shared;
 using System;
 using System.Collections.Generic;
@@ -62,9 +60,6 @@ namespace ProjectManager.API
             services.AddScoped<IRepository<TaskParticipation>, Repository<TaskParticipation>>();
             services.AddScoped<IRepository<TeamParticipation>, Repository<TeamParticipation>>();
             services.AddScoped<IRepository<Team>, Repository<Team>>();
-
-            services.AddScoped<ProjectsRepository>();
-            services.AddScoped<TasksRepository>();
 
 
 
