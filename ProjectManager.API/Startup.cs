@@ -51,6 +51,7 @@ namespace ProjectManager.API
             services.AddTransient<IProjectsService, ProjectsService>();
             services.AddTransient<ITasksService, TasksService>();
             services.AddTransient<IPolicyService, PolicyService>();
+            services.AddTransient<IStatusesService, StatusesService>();
 
             services.AddScoped<IRepository<User>, Repository<User>>();
             services.AddScoped<IRepository<Domain.Entities.Task>, Repository<Domain.Entities.Task>>();

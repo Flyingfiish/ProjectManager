@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Domain.Specifications.Common;
+using ProjectManager.Domain.Specifications.TaskParticipations;
 using ProjectManager.Domain.Specifications.Tasks;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace ProjectManager.API.Controllers
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPut]
         [Route("[action]")]
         public async Task<IActionResult> Create()
         {
@@ -67,6 +68,52 @@ namespace ProjectManager.API.Controllers
             try
             {
                 await _tasksService.Delete(new GetByIdSpecification<Domain.Entities.Task>(taskId), actorId);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> AddAssignee(Guid taskId, Guid assigneeId)
+        {
+            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
+            if (String.IsNullOrEmpty(id))
+            {
+                return Unauthorized();
+            }
+            Guid actorId = new Guid(id);
+
+            try
+            {
+                await _tasksService.AddAssignee(new GetByIdSpecification<Domain.Entities.Task>(taskId), assigneeId, actorId);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message + " \nInner exception" + e.InnerException);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete]
+        [Route("[action]")]
+        public async Task<IActionResult> DeleteAssignee(Guid taskId, Guid assigneeId)
+        {
+            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
+            if (String.IsNullOrEmpty(id))
+            {
+                return Unauthorized();
+            }
+            Guid actorId = new Guid(id);
+
+            try
+            {
+                await _tasksService.DeleteAssignee(new GetTaskParticipationSpecification(taskId, assigneeId), actorId);
                 return Ok();
             }
             catch (Exception e)

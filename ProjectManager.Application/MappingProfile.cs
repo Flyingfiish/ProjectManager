@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using ProjectManager.Application.DTOs.Project;
+using ProjectManager.Application.DTOs.ProjectParticipations;
+using ProjectManager.Application.DTOs.Status;
 using ProjectManager.Application.DTOs.Task;
 using ProjectManager.Application.DTOs.User;
 using ProjectManager.Domain.Entities;
@@ -19,6 +21,10 @@ namespace ProjectManager.Application
             CreateMap<Project, ProjectPreviewDto>();
             CreateMap<Project, ProjectDto>();
             CreateMap<ProjectForCreateDto, Project>();
+            CreateMap<ProjectParticipation, ProjectParticipationDto>();
+            CreateMap<ProjectParticipation, ProjectParticipationWithoutUserDto>();
+
+            CreateMap<Status, StatusDto>();
 
             CreateMap<Domain.Entities.Task, TaskPreviewDto>();
 

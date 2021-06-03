@@ -1,4 +1,5 @@
 ﻿using ProjectManager.Application.DTOs.Project;
+using ProjectManager.Application.DTOs.ProjectParticipations;
 using ProjectManager.Application.DTOs.Task;
 using ProjectManager.Application.DTOs.User;
 using ProjectManager.Domain.Entities;
@@ -16,10 +17,10 @@ namespace ProjectManager.Application.Interfaces
     {
         System.Threading.Tasks.Task Register(RegisterRequest registerDto, CancellationToken cancellationToken = default);
 
-        Task<UserShortDto> GetShortUser(Specification<User> spec);
+        Task<UserShortDto> GetShort(Specification<User> spec);
         Task<UserBIODto> GetUserBIO(Specification<User> spec);
-        Task<IEnumerable<ProjectPreviewDto>> GetUserProjects(Specification<User> spec);
-        Task<IEnumerable<TaskPreviewDto>> GetUserTasks(Specification<User> spec);
+        Task<IEnumerable<ProjectParticipationWithoutUserDto>> GetProjects(Specification<User> spec);
+        Task<IEnumerable<TaskPreviewDto>> GetTasks(Specification<User> spec);
 
         System.Threading.Tasks.Task Update(Specification<User> spec, Action<User> func, Guid actorId);
         //System.Threading.Tasks.Task UpdateUserBIO(UserBIODto userBIODto);

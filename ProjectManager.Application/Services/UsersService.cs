@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ProjectManager.Application.DTOs.Project;
+using ProjectManager.Application.DTOs.ProjectParticipations;
 using ProjectManager.Application.DTOs.Task;
 using ProjectManager.Application.DTOs.User;
 using ProjectManager.Application.Interfaces;
@@ -30,7 +31,7 @@ namespace ProjectManager.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<UserShortDto> GetShortUser(Specification<User> spec)
+        public async Task<UserShortDto> GetShort(Specification<User> spec)
         {
             User user = await _usersRepository.ReadOne(spec);
 
@@ -44,19 +45,22 @@ namespace ProjectManager.Application.Services
             return _mapper.Map<UserBIODto>(user);
         }
 
-        public async Task<IEnumerable<ProjectPreviewDto>> GetUserProjects(Specification<User> spec)
+        public async Task<IEnumerable<ProjectParticipationWithoutUserDto>> GetProjects(Specification<User> spec)
         {
-            spec.Includes = u => u.Include(u => u.AssignedProjects);
+            spec.Includes = u => u
+            .Include(u => u.ProjectParticipations)
+            .ThenInclude(p => p.Project)
+            .ThenInclude(p => p.Members);
 
             User user = await _usersRepository.ReadOne(spec);
 
-            IEnumerable<Project> projects = user.AssignedProjects;
-            var result = _mapper.Map<List<ProjectPreviewDto>>(projects);
+            IEnumerable<ProjectParticipation> projects = user.ProjectParticipations;
+            var result = _mapper.Map<List<ProjectParticipationWithoutUserDto>>(projects);
 
             return result;
         }
 
-        public async Task<IEnumerable<TaskPreviewDto>> GetUserTasks(Specification<User> spec)
+        public async Task<IEnumerable<TaskPreviewDto>> GetTasks(Specification<User> spec)
         {
             spec.Includes = u => u.Include(u => u.Tasks);
 

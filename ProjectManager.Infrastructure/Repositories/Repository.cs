@@ -57,22 +57,16 @@ namespace ProjectManager.Infrastructure.Repositories
                 .FirstOrDefaultAsync(spec.ToExpression());
         }
 
-        public async IAsyncEnumerable<T> ReadMany(Specification<T> spec)
+        public async Task<List<T>> ReadMany(Specification<T> spec)
         {
             IQueryable<T> query = _context.Set<T>();
             if (spec.Includes != null)
             {
                 query = spec.Includes(query);
             }
-            IAsyncEnumerator<T> enumerator = query
+            return await query
                 .AsNoTracking()
-                .Where(spec.ToExpression())
-                .AsAsyncEnumerable()
-                .GetAsyncEnumerator();
-            while (await enumerator.MoveNextAsync())
-            {
-                yield return enumerator.Current;
-            }
+                .Where(spec.ToExpression()).ToListAsync();
         }
 
         public async Task Update(Specification<T> spec, Action<T> func)

@@ -25,9 +25,10 @@ namespace ProjectManager.Application.Services
 
         public async Task<ProjectParticipation> GetHighestParticipation(Specification<ProjectParticipation> spec)
         {
+            List<ProjectParticipation> projectParticipations = await _projectsParticiparionRepository.ReadMany(spec);
             ProjectParticipation highestParticipation = new ProjectParticipation() { ParticipationType = ParticipationType.Executor};
 
-            await foreach (var projectParticipation in _projectsParticiparionRepository.ReadMany(spec))
+            foreach (var projectParticipation in projectParticipations)
             {
                 if ((int)highestParticipation.ParticipationType > (int)projectParticipation.ParticipationType)
                 {

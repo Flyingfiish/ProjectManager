@@ -14,7 +14,7 @@ namespace ProjectManager.Application.Interfaces
         System.Threading.Tasks.Task Create(Status status, Guid actorId);
         System.Threading.Tasks.Task Delete(Guid projectId, Guid statusId, Guid actorId);
 
-        Task<IAsyncEnumerable<StatusDto>> GetStatuses(Specification<Status> spec, Specification<ProjectParticipation> actorSpec);
+        Task<List<StatusDto>> GetStatuses(Specification<Status> spec, Specification<ProjectParticipation> actorSpec);
 
         System.Threading.Tasks.Task Update(Specification<Status> spec, Action<Status> func, Specification<ProjectParticipation> actorSpec);
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ProjectManager.Application.Interfaces
 {
@@ -15,10 +16,10 @@ namespace ProjectManager.Application.Interfaces
         System.Threading.Tasks.Task AddAssignee(Specification<Domain.Entities.Task> spec, Guid assigneeId, Guid actorId);
         System.Threading.Tasks.Task DeleteAssignee(Specification<TaskParticipation> spec, Guid actorId);
 
-        System.Threading.Tasks.Task Update(Specification<Domain.Entities.Task> spec, Action<Task> func, Guid actorId);
+        System.Threading.Tasks.Task Update(Specification<Domain.Entities.Task> spec, Action<Domain.Entities.Task> func, Guid actorId);
         System.Threading.Tasks.Task Move(Specification<Domain.Entities.Task> spec, int index, Guid statusId, Guid actorId);
 
-        IAsyncEnumerable<Task> GetTasks(Specification<Domain.Entities.Task> spec, Guid actorId);
+        Task<List<Domain.Entities.Task>> GetTasks(Specification<Domain.Entities.Task> spec, Guid actorId);
 
     }
 }

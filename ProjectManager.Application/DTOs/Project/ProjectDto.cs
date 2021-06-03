@@ -1,4 +1,5 @@
-﻿using ProjectManager.Application.DTOs.Task;
+﻿using ProjectManager.Application.DTOs.Status;
+using ProjectManager.Application.DTOs.Task;
 using ProjectManager.Application.DTOs.User;
 using ProjectManager.Domain.Entities;
 using System;
@@ -14,16 +15,17 @@ namespace ProjectManager.Application.DTOs.Project
         public Guid Id { get; set; }
         public string Name { get; set; }
 
-        public List<ProjectProjectUserDto> ProjectUsers { get; set; } = new List<ProjectProjectUserDto>();
+        public List<ProjectProjectUserDto> Participations { get; set; } = new List<ProjectProjectUserDto>();
 
         public string Description { get; set; }
         public string HexColor { get; set; }
         public ProjectState State { get; set; }
-        public ProjectType ProjectType { get; set; }
+        public ProjectType Type { get; set; }
+        public ProjectPrivacy Privacy { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public UserShortDto CreatedBy { get; set; }
 
-        public List<TaskPreviewDto> Tasks { get; set; } = new List<TaskPreviewDto>();
+        public List<StatusDto> Statuses { get; set; } = new List<StatusDto>();
     }
 }

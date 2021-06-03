@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjectManager.Application.DTOs.Project;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Domain.Entities;
@@ -58,6 +59,29 @@ namespace ProjectManager.API.Controllers
         }
 
         [Authorize]
+        [HttpDelete]
+        [Route("[action]")]
+        public async Task<IActionResult> Delete(Guid projectId)
+        {
+            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
+            if (String.IsNullOrEmpty(id))
+            {
+                return Unauthorized();
+            }
+            Guid actorId = new Guid(id);
+
+            try
+            {
+                await _projectsService.Delete(projectId, actorId);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [Authorize]
         [HttpPost]
         [Route("[action]")]
         public async Task<IActionResult> AddMember(Guid projectId, Guid memberId, ParticipationType participationType)
@@ -102,56 +126,6 @@ namespace ProjectManager.API.Controllers
                 return BadRequest(e.Message);
             }
         }
-
-        
-
-        [Authorize]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<IActionResult> UpdateManager(Guid projectId, Guid managerId)
-        {
-            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-            if (String.IsNullOrEmpty(id))
-            {
-                return Unauthorized();
-            }
-            Guid actorId = new Guid(id);
-
-            try
-            {
-                await _projectsService.UpdateManager(projectId, managerId, actorId);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [Authorize]
-        [HttpGet]
-        [Route("[action]")]
-        public async Task<IActionResult> GetProject(Guid projectId)
-        {
-            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-            if (String.IsNullOrEmpty(id))
-            {
-                return Unauthorized();
-            }
-            Guid actorId = new Guid(id);
-
-            try
-            {
-                var response = await _projectsService.GetProject(new GetByIdSpecification<Project>(projectId), new GetProjectParticipationByKeySpec(projectId, actorId));
-                return Ok(response);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        
 
         [Authorize]
         [HttpPost]
@@ -199,10 +173,12 @@ namespace ProjectManager.API.Controllers
             }
         }
 
+
+
         [Authorize]
-        [HttpDelete]
+        [HttpPost]
         [Route("[action]")]
-        public async Task<IActionResult> Delete(Guid projectId)
+        public async Task<IActionResult> UpdateManager(Guid projectId, Guid managerId)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -213,7 +189,7 @@ namespace ProjectManager.API.Controllers
 
             try
             {
-                await _projectsService.Delete(projectId, actorId);
+                await _projectsService.UpdateManager(projectId, managerId, actorId);
                 return Ok();
             }
             catch (Exception e)
@@ -221,5 +197,39 @@ namespace ProjectManager.API.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GetProject(Guid projectId)
+        {
+            var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
+            if (String.IsNullOrEmpty(id))
+            {
+                return Unauthorized();
+            }
+            Guid actorId = new Guid(id);
+
+            try
+            {
+                var response = await _projectsService.GetProject(
+                    new GetByIdSpecification<Project>(projectId)
+                    {
+                        Includes = p => p
+                        .Include(p => p.Participations)
+                            .ThenInclude(p => p.User)
+                        .Include(p => p.CreatedBy)
+                        .Include(p => p.Statuses.OrderBy(s => s.Index))
+                            .ThenInclude(s => s.Tasks.OrderBy(t => t.Index))
+                    },
+                    new GetProjectParticipationByKeySpec(projectId, actorId));
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
     }
 }

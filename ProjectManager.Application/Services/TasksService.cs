@@ -17,25 +17,29 @@ namespace ProjectManager.Application.Services
     {
         private readonly IRepository<Domain.Entities.Task> _tasksRepository;
         private readonly IRepository<TaskParticipation> _partisipationsRepository;
+        private readonly IRepository<Status> _statusesRepository;
         private readonly IPolicyService _policyService;
 
         public TasksService(
             IRepository<Domain.Entities.Task> tasksRepository,
             IRepository<TaskParticipation> partisipationsRepository,
+            IRepository<Status> statusesRepository,
             IPolicyService policyService)
         {
             _tasksRepository = tasksRepository;
             _partisipationsRepository = partisipationsRepository;
+            _statusesRepository = statusesRepository;
             _policyService = policyService;
         }
 
-        public IAsyncEnumerable<Domain.Entities.Task> GetTasks(Specification<Domain.Entities.Task> spec, Guid actorId)
+        public async Task<List<Domain.Entities.Task>> GetTasks(Specification<Domain.Entities.Task> spec, Guid actorId)
         {
-            return _tasksRepository.ReadMany(spec);
+            return await _tasksRepository.ReadMany(spec);
         }
 
         public async System.Threading.Tasks.Task Create(Domain.Entities.Task task, Guid actorId)
         {
+            task.CreatedAt = DateTime.UtcNow;
             await _tasksRepository.Create(task);
         }
 
@@ -50,6 +54,7 @@ namespace ProjectManager.Application.Services
             if (await _policyService.IsAllowedToTaskCRUD(new GetProjectParticipationByKeySpec(task.ProjectId, actorId)))
             {
                 await _partisipationsRepository.Create(new TaskParticipation() { TaskId = task.Id, UserId = assigneeId });
+                await _tasksRepository.Update(spec, t => t.UpdatedAt = DateTime.UtcNow);
             }
         }
 
@@ -57,6 +62,7 @@ namespace ProjectManager.Application.Services
         {
             ////////////////////////////////////////////////////////////
             await _partisipationsRepository.Delete(spec);
+
         }
 
         public async System.Threading.Tasks.Task Update(Specification<Domain.Entities.Task> spec, Action<Domain.Entities.Task> func, Guid actorId)
@@ -65,6 +71,7 @@ namespace ProjectManager.Application.Services
             if (await _policyService.IsAllowedToTaskCRUD(new GetProjectParticipationByKeySpec(task.ProjectId, actorId)))
             {
                 await _tasksRepository.Update(spec, func);
+                await _tasksRepository.Update(spec, t => t.UpdatedAt = DateTime.UtcNow);
             }
         }
 
@@ -76,7 +83,8 @@ namespace ProjectManager.Application.Services
 
             if (task.StatusId == statusId)
             {
-                var tasks = project.Statuses.FirstOrDefault(s => s.Id == statusId).Tasks.OrderBy(t => t.Index).ToList();
+                var status = await _statusesRepository.ReadOne(new GetByIdSpecification<Status>(statusId) { Includes = s => s.Include(s => s.Tasks) });
+                var tasks = status.Tasks.OrderBy(t => t.Index).ToList();
 
                 tasks.RemoveAt(task.Index);
                 tasks.Insert(index, task);
@@ -88,8 +96,11 @@ namespace ProjectManager.Application.Services
             }
             else
             {
-                var newTasks = project.Statuses.FirstOrDefault(s => s.Id == statusId).Tasks.OrderBy(t => t.Index).ToList();
-                var oldTasks = project.Statuses.FirstOrDefault(s => s.Id == task.StatusId).Tasks.OrderBy(t => t.Index).ToList();
+                var newStatus = await _statusesRepository.ReadOne(new GetByIdSpecification<Status>(statusId));
+                var oldStatus = await _statusesRepository.ReadOne(new GetByIdSpecification<Status>(task.StatusId));
+
+                var newTasks = newStatus.Tasks.OrderBy(t => t.Index).ToList();
+                var oldTasks = oldStatus.Tasks.OrderBy(t => t.Index).ToList();
 
                 await _tasksRepository.Update(new GetByIdSpecification<Domain.Entities.Task>(task.Id), t => t.StatusId = statusId);
 

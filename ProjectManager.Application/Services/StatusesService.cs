@@ -6,6 +6,7 @@ using ProjectManager.Domain.Entities;
 using ProjectManager.Domain.Specifications;
 using ProjectManager.Domain.Specifications.Common;
 using ProjectManager.Domain.Specifications.ProjectParticipations;
+using ProjectManager.Domain.Specifications.Statuses;
 using ProjectManager.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
@@ -45,11 +46,14 @@ namespace ProjectManager.Application.Services
             }
         }
 
-        public async Task<IAsyncEnumerable<StatusDto>> GetStatuses(Specification<Status> spec, Specification<ProjectParticipation> actorSpec)
+        public async Task<List<StatusDto>> GetStatuses(Specification<Status> spec, Specification<ProjectParticipation> actorSpec)
         {
             if (await _policyService.IsAllowedGetProject(actorSpec))
             {
-                return _mapper.Map<IAsyncEnumerable<StatusDto>>(_statusesRepository.ReadMany(spec));
+                spec.Includes = s => s.Include(s => s.Tasks.OrderBy(t => t.Index));
+                var statuses = await _statusesRepository.ReadMany(spec);
+                var result = _mapper.Map<List<StatusDto>>(statuses.OrderBy(s => s.Index));
+                return result;  
             }
             return null;
         }
@@ -58,9 +62,9 @@ namespace ProjectManager.Application.Services
         {
             if (await _policyService.IsAllowedPMManagement(actorSpec))
             {
-                spec.Includes = s => s.Include(s => s.Project).ThenInclude(p => p.Statuses);
                 var status = await _statusesRepository.ReadOne(spec);
-                var statuses = status.Project.Statuses.OrderBy(s => s.Index).ToList();
+                var statuses = await _statusesRepository.ReadMany(new GetStatusByProjectIdSpecification(status.ProjectId));
+                statuses = statuses.OrderBy(s => s.Index).ToList();
 
                 statuses.RemoveAt(status.Index);
                 statuses.Insert(index, status);
