@@ -20,7 +20,9 @@ using ProjectManager.Infrastructure.Repositories;
 using ProjectManager.Infrastructure.Shared;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ProjectManager.API
@@ -42,8 +44,7 @@ namespace ProjectManager.API
                 mc.AddProfile(new MappingProfile());
             });
 
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            services.AddSingleton(mapperConfig.CreateMapper());
 
             services.AddDbContext<ApplicationContext>();
 
@@ -90,6 +91,9 @@ namespace ProjectManager.API
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProjectManager.API", Version = "v1" });
+                var fileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
+                c.IncludeXmlComments(filePath);
             });
         }
 

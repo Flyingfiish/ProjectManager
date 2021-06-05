@@ -11,14 +11,14 @@ namespace ProjectManager.Application.DTOs.Project
     public class ProjectPreviewDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public string Title { get; set; }
 
         public List<UserShortDto> Members { get; set; } = new List<UserShortDto>();
 
         public string Description { get; set; }
         public string HexColor { get; set; }
         public ProjectState State { get; set; }
-        public ProjectType ProjectType { get; set; }
+        public ProjectType Type { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public UserShortDto CreatedBy { get; set; }

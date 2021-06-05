@@ -60,7 +60,6 @@ namespace ProjectManager.Application.Services
 
         public async System.Threading.Tasks.Task DeleteAssignee(Specification<TaskParticipation> spec, Guid actorId)
         {
-            ////////////////////////////////////////////////////////////
             await _partisipationsRepository.Delete(spec);
 
         }

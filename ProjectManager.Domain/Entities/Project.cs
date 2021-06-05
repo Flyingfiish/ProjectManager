@@ -10,7 +10,7 @@ namespace ProjectManager.Domain.Entities
     public class Project : IGuidKey
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public string Title { get; set; }
 
         public List<User> Members { get; set; } = new List<User>();
         public List<ProjectParticipation> Participations { get; set; } = new List<ProjectParticipation>();

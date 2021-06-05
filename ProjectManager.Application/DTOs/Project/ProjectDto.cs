@@ -13,7 +13,7 @@ namespace ProjectManager.Application.DTOs.Project
     public class ProjectDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public string Title { get; set; }
 
         public List<ProjectProjectUserDto> Participations { get; set; } = new List<ProjectProjectUserDto>();
 

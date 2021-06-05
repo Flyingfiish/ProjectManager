@@ -22,7 +22,7 @@ namespace ProjectManager.Tests
         ProjectsRepository _projectsRepository;
         Project _testProject = new Project()
         {
-            Name = "123",
+            Title = "123",
             Description = "123",
             HexColor = "#FFF",
             CreatedAt = DateTime.Now,
