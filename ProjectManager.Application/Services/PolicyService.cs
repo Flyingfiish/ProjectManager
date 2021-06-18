@@ -15,12 +15,10 @@ namespace ProjectManager.Application.Services
     public class PolicyService : IPolicyService
     {
         private readonly IRepository<ProjectParticipation> _projectsParticiparionRepository;
-        private readonly IRepository<Project> _projectsRepository;
 
         public PolicyService(IRepository<ProjectParticipation> projectsParticiparionRepository, IRepository<Project> projectsRepository)
         {
             _projectsParticiparionRepository = projectsParticiparionRepository;
-            _projectsRepository = projectsRepository;
         }
 
         public async Task<ProjectParticipation> GetHighestParticipation(Specification<ProjectParticipation> spec)

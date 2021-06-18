@@ -13,19 +13,18 @@ namespace ProjectManager.Infrastructure.EFCore
         public DbSet<TeamParticipation> TeamUsers { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<Status> Statuses { get; set; }
-        //public DbSet<Event> Events { get; set; }
         public DbSet<SubTask> SubTasks { get; set; }
         public DbSet<TaskParticipation> TaskParticipations { get; set; }
 
         public ApplicationContext()
         {
-            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=DESKTOP-GPON2I3;Database=PMF;Trusted_Connection=True;");
+            optionsBuilder
+                .UseSqlServer("Server=DESKTOP-GPON2I3;Database=PMF;Trusted_Connection=True;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -30,7 +30,7 @@ namespace ProjectManager.API.Controllers
         [Authorize]
         [HttpPut]
         [Route("[action]")]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create([FromBody] ProjectForCreateDto projectForCreate)
         {
             var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
             if (String.IsNullOrEmpty(id))
@@ -45,7 +45,6 @@ namespace ProjectManager.API.Controllers
 
                 try
                 {
-                    ProjectForCreateDto projectForCreate = JsonSerializer.Deserialize<ProjectForCreateDto>(body);
 
                     await _projectsService.Create(projectForCreate, createdById);
 

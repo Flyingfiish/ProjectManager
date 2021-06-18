@@ -112,12 +112,8 @@ namespace ProjectManager.API.Controllers
         {
             try
             {
-                var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-                if (String.IsNullOrEmpty(id))
-                {
-                    return Unauthorized();
-                }
-                var result = await _usersService.GetProjects(new GetUserByIdSpecification(new Guid(id)));
+                Guid id = new(User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+                var result = await _usersService.GetProjects(new GetUserByIdSpecification(id));
                 return Ok(result);
             }
             catch (Exception err)
@@ -134,10 +130,7 @@ namespace ProjectManager.API.Controllers
             try
             {
                 var id = User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault();
-                if (String.IsNullOrEmpty(id))
-                {
-                    return Unauthorized();
-                }
+
                 var result = await _usersService.GetTasks(new GetUserByIdSpecification(new Guid(id)));
                 return Ok(result);
             }

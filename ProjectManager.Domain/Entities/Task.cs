@@ -15,7 +15,8 @@ namespace ProjectManager.Domain.Entities
         public Status Status { get; set; }
 
         public List<User> Assignees { get; set; } = new List<User>();
-        public List<TaskParticipation> TaskParticipations { get; set; } = new List<TaskParticipation>();
+        public List<TaskParticipation> TaskParticipations { get; set; } = 
+            new List<TaskParticipation>();
         public List<SubTask> SubTasks { get; set; } = new List<SubTask>();
 
         public int Index { get; set; }
